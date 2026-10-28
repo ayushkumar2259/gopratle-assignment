@@ -1,228 +1,281 @@
 # GoPratle Event Requirement Poster
 
-A working full-stack submission for the GoPratle Full-Stack Developer Intern assignment: a four-step event requirement flow with a Next.js frontend and an Express + MongoDB API in one repository.
+A full-stack event requirement posting application built for the GoPratle Full-Stack Developer Intern assignment. It provides a four-step wizard for event planners, performers, and crew to submit event requirements, with server-side validation and MongoDB persistence.
+
+## Live Demo
+
+- **Frontend:** https://gopratle-assignment-2mkv5rk1q-ayushkumar2259s-projects.vercel.app/
+- **Backend Health:** https://gopratle-backend-zv3f.onrender.com/api/health
+- **GitHub Repository:** https://github.com/ayushkumar2259/gopratle-assignment
 
 ## Architecture
 
-```
+```text
 Browser (Next.js App Router)
-  → POST /api/requirements
-Express routes → validation middleware → controller
-  → Mongoose Requirement model
-  → MongoDB `requirements` collection
-Browser success page
-  → GET /api/requirements/:id
+        |
+        | POST /api/requirements
+        v
+Express API
+        |
+        v
+Validation Middleware
+        |
+        v
+Controller → Mongoose Model
+        |
+        v
+MongoDB Atlas
+        |
+        v
+Saved requirement displayed
+on the success page
 ```
 
-| Layer | Location | Role |
-| --- | --- | --- |
-| UI | `frontend/` | Four-step wizard, client validation, loading and duplicate-submit protection |
-| API | `backend/` | Express routes, controllers, middleware, centralized errors |
-| Data | MongoDB Atlas (production) or in-memory Mongo (local demo) | Persisted requirement documents |
+| Layer | Location | Responsibility |
+|---|---|---|
+| Frontend | `frontend/` | Four-step wizard, client-side validation, loading states, and duplicate-submission protection |
+| Backend | `backend/` | REST API, server-side validation, controllers, and centralized error handling |
+| Database | MongoDB Atlas | Persistent storage of submitted requirements |
 
-The frontend never receives `MONGODB_URI`. Only the Node server talks to the database.
+The frontend communicates with the backend through HTTP requests. MongoDB credentials remain on the server and are never exposed to the browser.
 
-## Project structure
+## Technology Stack
 
+**Frontend**
+- Next.js and React
+- JavaScript
+- Client-side form validation
+
+**Backend**
+- Node.js
+- Express.js
+- REST API
+- Mongoose
+
+**Database**
+- MongoDB Atlas
+
+**Testing and deployment**
+- Jest and Supertest for backend tests
+- Node.js test runner for frontend validation tests
+- Vercel for frontend deployment
+- Render for backend deployment
+
+## Project Structure
+
+```text
+gopratle-assignment/
+├── backend/
+│   ├── src/
+│   │   ├── app.js
+│   │   ├── server.js
+│   │   ├── config/
+│   │   ├── models/
+│   │   ├── routes/
+│   │   ├── controllers/
+│   │   ├── middleware/
+│   │   └── utils/
+│   └── tests/
+├── frontend/
+│   ├── app/
+│   ├── components/
+│   └── lib/
+├── render.yaml
+└── README.md
 ```
-backend/
-  src/app.js
-  src/server.js
-  src/config/          env + database connection
-  src/models/          Requirement schema
-  src/routes/          /api/health and /api/requirements
-  src/controllers/
-  src/middleware/      validation + error handler
-  src/utils/           request validators
-  tests/               Jest + Supertest
-frontend/
-  app/                 App Router pages
-  components/          wizard steps
-  lib/                 constants, validation, API client
-```
 
-## Prerequisites
+## Features
 
-- Node.js 18 or newer (this project was developed on Node 22)
+- Four-step event requirement submission wizard
+- Support for three categories: planner, performer, and crew
+- Category-specific fields and validation
+- Review submitted details before submission
+- Navigate back and edit previous steps
+- Loading states and protection against duplicate submissions
+- Server-side validation before saving data
+- MongoDB persistence
+- Success page displaying the saved requirement
+- API health endpoint for deployment monitoring
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18 or newer
 - npm
-- A MongoDB Atlas cluster for production and for a durable local database
+- MongoDB Atlas, or the project's supported in-memory database configuration for local development
 
-You can run the API locally without Atlas by setting `MONGODB_URI=memory`. That starts `mongodb-memory-server` for a temporary database. It is not a production configuration.
-
-## Setup
+### 1. Clone the repository
 
 ```bash
-git clone <your-fork-url>
+git clone https://github.com/ayushkumar2259/gopratle-assignment.git
 cd gopratle-assignment
+```
 
+### 2. Set up the backend
+
+Open a terminal:
+
+```bash
 cd backend
 copy .env.example .env
 npm install
+```
 
-cd ../frontend
+Configure the environment variables in `backend/.env`:
+
+```env
+PORT=5000
+NODE_ENV=development
+MONGODB_URI=your_mongodb_connection_string
+FRONTEND_URL=http://localhost:3000
+```
+
+Use your own MongoDB connection string. Never commit real credentials to GitHub.
+
+Start the backend:
+
+```bash
+npm run dev
+```
+
+The API should run at `http://localhost:5000`.
+
+### 3. Set up the frontend
+
+Open a second terminal from the project root:
+
+```bash
+cd frontend
 copy .env.example .env.local
 npm install
 ```
 
-On macOS/Linux use `cp` instead of `copy`.
+Configure `frontend/.env.local`:
 
-## Environment variables
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000
+```
 
-### `backend/.env`
-
-| Name | Required | Purpose |
-| --- | --- | --- |
-| `PORT` | No (default `5000`) | API port |
-| `NODE_ENV` | No | `development`, `test`, or `production` |
-| `MONGODB_URI` | Yes | Atlas connection string, or `memory` for local demo |
-| `FRONTEND_URL` | Yes | Allowed CORS origin. Comma-separate multiple origins |
-
-### `frontend/.env.local`
-
-| Name | Required | Purpose |
-| --- | --- | --- |
-| `NEXT_PUBLIC_API_URL` | Yes | Public API origin, for example `http://localhost:5000` |
-
-Do not put Atlas credentials in any `NEXT_PUBLIC_` variable. `.env` and `.env.local` are gitignored. Commit only `.env.example` files.
-
-## Commands
-
-Terminal 1 — API:
+Start the frontend:
 
 ```bash
-cd backend
 npm run dev
 ```
 
-Terminal 2 — UI:
+Open http://localhost:3000.
 
-```bash
-cd frontend
-npm run dev
-```
+For macOS/Linux, use `cp` instead of `copy` when copying the example environment files.
 
-Open `http://localhost:3000`.
+## Environment Variables
 
-| Command | Where | What it does |
-| --- | --- | --- |
-| `npm run dev` | backend | Nodemon API |
-| `npm start` | backend | Production `node src/server.js` |
-| `npm test` | backend | Jest API tests with an in-memory database |
-| `npm run dev` | frontend | Next.js dev server |
-| `npm run build` / `npm start` | frontend | Production Next.js build |
-| `npm test` | frontend | Node test runner for form validation |
-| `npm run lint` | frontend | ESLint |
+### Backend
 
-## API
+| Variable | Purpose |
+|---|---|
+| `PORT` | API port; defaults to `5000` |
+| `NODE_ENV` | Runtime environment |
+| `MONGODB_URI` | MongoDB connection string or supported local demo configuration |
+| `FRONTEND_URL` | Allowed frontend origin for CORS; multiple origins may be comma-separated if supported by the application |
 
-Base URL locally: `http://localhost:5000`
+### Frontend
+
+| Variable | Purpose |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | Base URL of the backend API |
+
+Environment files containing secrets should remain untracked by Git. Only example environment files should be committed.
+
+## API Endpoints
 
 ### `GET /api/health`
 
-```json
-{
-  "success": true,
-  "service": "gopratle-requirements-api",
-  "status": "ok",
-  "database": "connected",
-  "timestamp": "2026-10-25T22:00:00.000Z"
-}
-```
+Checks the API and database connection.
+
+Production endpoint:
+
+https://gopratle-backend-zv3f.onrender.com/api/health
+
+A healthy response includes a successful status and a database connection status.
 
 ### `POST /api/requirements`
 
-Creates a document. Returns `201` on success, `400` with `errors` on validation failure.
+Creates a new event requirement.
 
-Planner example:
+- Returns `201 Created` on successful submission.
+- Returns `400 Bad Request` for validation errors.
+- Saves valid requirements to MongoDB.
 
-```bash
-curl -X POST http://localhost:5000/api/requirements ^
-  -H "Content-Type: application/json" ^
-  -d "{\"eventName\":\"Spring Garden Wedding\",\"eventType\":\"Wedding\",\"startDate\":\"2026-12-12\",\"endDate\":\"2026-12-12\",\"location\":\"Bengaluru\",\"venue\":\"Lalbagh Glass House\",\"category\":\"planner\",\"plannerDetails\":{\"expectedAttendees\":180,\"budget\":250000,\"requiredServices\":[\"Decor\",\"Catering\"],\"experience\":\"3-5 years\",\"numberOfPlanners\":2,\"additionalNotes\":\"Prefer sustainable decor.\"}}"
-```
-
-Performer and crew payloads use `category: "performer"` + `performerDetails`, or `category: "crew"` + `crewDetails`. Sending details for a different category is rejected.
+The request includes common event fields and category-specific details for the selected planner, performer, or crew category.
 
 ### `GET /api/requirements/:id`
 
-Returns the saved document, or `400` for a bad id, or `404` if it does not exist.
+Retrieves a saved requirement using its ID.
 
-The stored shape includes:
+- Returns the saved document when found.
+- Returns `400` for an invalid ID.
+- Returns `404` when the requirement does not exist.
 
-- Event fields: name, type, start/end dates, location, optional venue
-- `category`: `planner` | `performer` | `crew`
-- Matching `plannerDetails`, `performerDetails`, or `crewDetails`
-- `status` (`submitted`)
-- `createdAt` / `updatedAt`
+## Form Flow
 
-## Form flow
+1. **Event basics:** Enter the event name, type, dates, location, and category.
+2. **Category requirements:** Provide details specific to the selected planner, performer, or crew category.
+3. **Preferences:** Enter remaining numeric fields, preferences, and additional notes.
+4. **Review and submit:** Review the details, return to edit previous steps if needed, and submit the requirement.
 
-1. Event basics, including single-day dates (`startDate === endDate`) and required category
-2. Category requirements (planner services / performer type / crew roles)
-3. Preferences, notes, and remaining numeric fields
-4. Full review, edit links, then submit
-
-Changing category clears planner, performer, and crew details so leftover fields cannot be submitted.
+The form supports single-day events. Changing the category clears incompatible category-specific details to prevent incorrect data from being submitted.
 
 ## Testing
 
-From `backend/`:
+### Backend
+
+Run from the `backend/` directory:
 
 ```bash
 npm test
 ```
 
-Tests cover health, planner/performer/crew creates, missing fields, inverted dates, incompatible category details, invalid numbers, GET by id, malformed id, and unknown routes.
+The backend tests cover health checks, requirement creation for the supported categories, validation errors, date constraints, category-specific fields, retrieval by ID, malformed IDs, and unknown routes.
 
-From `frontend/`:
+### Frontend
+
+Run from the `frontend/` directory:
 
 ```bash
 npm test
 ```
 
-Manual checks: all three categories, back/continue, required-field errors, date ranges, category switching, duplicate submit clicks, and the success page only after a `201`.
+Manual testing should include category switching, navigation between steps, required-field errors, date ranges, duplicate submission attempts, and successful submission.
 
 ## Deployment
 
-Public URLs are not included here until they have been opened and verified.
+### Frontend — Vercel
 
-### MongoDB Atlas
+- Project root: `frontend`
+- Framework: Next.js
+- Environment variable: `NEXT_PUBLIC_API_URL`
 
-1. Create a free cluster.
-2. Create a database user.
-3. Network Access → allow the Render (or host) IP, or `0.0.0.0/0` if you accept that risk for a demo.
-4. Connect → Drivers → copy the URI. Database name can be `gopratle`.
-5. Put the URI only in the backend host’s `MONGODB_URI` secret.
+Set `NEXT_PUBLIC_API_URL` to:
 
-### Backend (Render)
+```text
+https://gopratle-backend-zv3f.onrender.com
+```
 
-1. Push this repo to GitHub.
-2. New → Web Service → this repository.
-3. Root directory: `backend`.
-4. Build: `npm install`. Start: `npm start`.
-5. Set `NODE_ENV=production`, `MONGODB_URI`, and `FRONTEND_URL` (your Vercel origin, no trailing slash).
-6. After the first deploy, open `https://<render-host>/api/health` and confirm `"database": "connected"`.
+### Backend — Render
 
-`render.yaml` at the repo root describes the same service.
+- Service root: `backend`
+- Build command: `npm install`
+- Start command: `npm start`
 
-### Frontend (Vercel)
+Configure `NODE_ENV`, `MONGODB_URI`, and `FRONTEND_URL` in the Render environment settings. Use the deployed frontend origin for `FRONTEND_URL`.
 
-1. Import the GitHub repo in Vercel.
-2. Root directory: `frontend`.
-3. Framework: Next.js.
-4. Set `NEXT_PUBLIC_API_URL` to the Render origin, for example `https://<render-host>`.
-5. Deploy, then add that Vercel origin to backend `FRONTEND_URL` and redeploy the API if CORS blocks the browser.
+### Database — MongoDB Atlas
 
-### Verify a public submission
+The deployed backend connects to MongoDB Atlas through `MONGODB_URI`. Database credentials are configured on the backend host and are not included in the frontend bundle or repository.
 
-1. Submit a requirement on the Vercel app.
-2. Confirm the Network tab shows `201` from Render.
-3. Open Atlas → `requirements` and find the same `_id`.
-4. Open `/success/<id>` and confirm GET returns the document.
+## Scope
 
-## Out of scope
-
-No authentication, payments, or admin tools. Those were excluded on purpose.
+Authentication, payments, and administrative tools are outside the scope of this assignment.
 
 ## License
 
