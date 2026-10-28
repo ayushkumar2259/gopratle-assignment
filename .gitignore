@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Logs and OS
+logs/
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Build / test artifacts
+.next/
+out/
+dist/
+coverage/
+.vercel/
+.turbo/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# MongoDB memory server downloads (if cached locally)
+.cache/
+backend/.cache/
+# Frontend and backend environment files
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# Backend build output
+backend/dist/
+backend/coverage/
